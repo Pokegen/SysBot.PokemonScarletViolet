@@ -2,7 +2,7 @@ name: Build SysBot.Pokemon.ConsoleApp Docker Image
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - SysBot.Pokemon.Z3/**
       - SysBot.Pokemon.ConsoleApp/**
