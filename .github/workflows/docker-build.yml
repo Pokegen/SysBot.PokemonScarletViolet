@@ -1,0 +1,128 @@
+name: Build SysBot.Pokemon.ConsoleApp Docker Image
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - SysBot.Pokemon.Z3/**
+      - SysBot.Pokemon.ConsoleApp/**
+      - SysBot.Pokemon.Discord/**
+      - SysBot.Pokemon.Twitch/**
+      - SysBot.Pokemon.Twitter/**
+      - SysBot.Pokemon.YouTube/**
+      - SysBot.Pokemon/**
+      - SysBot.Base/**
+      - .github/workflows/docker-build.yml
+
+jobs:
+  amd64:
+    name: Build AMD64 Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get short hash of commit
+        id: sha_short
+        shell: bash
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./SysBot.Pokemon.ConsoleApp/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/pokegen/sysbot.net.scarlet-violet:${{ steps.sha_short.outputs.sha_short }}
+            ghcr.io/pokegen/sysbot.net.scarlet-violet:latest
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+  arm64:
+    name: Build ARM64 Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get short hash of commit
+        id: sha_short
+        shell: bash
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./SysBot.Pokemon.ConsoleApp/Dockerfile.arm64
+          push: true
+          tags: |
+            ghcr.io/pokegen/sysbot.net.scarlet-violet:${{ steps.sha_short.outputs.sha_short }}-arm64
+            ghcr.io/pokegen/sysbot.net.scarlet-violet:latest-arm64
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+  alpine:
+    name: Build Alpine Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get short hash of commit
+        id: sha_short
+        shell: bash
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./SysBot.Pokemon.ConsoleApp/Dockerfile.alpine
+          push: true
+          tags: |
+            ghcr.io/pokegen/sysbot.net.scarlet-violet:${{ steps.sha_short.outputs.sha_short }}-alpine
+            ghcr.io/pokegen/sysbot.net.scarlet-violet:latest-alpine
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}

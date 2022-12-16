@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="PKHeX.Core" Version="22.12.1" />
     <ProjectReference Include="..\SysBot.Pokemon\SysBot.Pokemon.csproj" />
+    <PackageReference Include="Microsoft.Z3.x64" Version="4.8.10" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,19 +25,5 @@
   <ItemGroup>
     <None Update="runtimes\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-
-  <Choose>
-    
-    <When Condition=" '$(Platform)' == 'x64' OR $(RuntimeIdentifier.EndsWith('x64')) ">
-      <!-- x64 specific references -->
-      <ItemGroup>
-        <PackageReference Include="Microsoft.Z3.x64" Version="4.8.10" />
-      </ItemGroup>
-    </When>
-    
-    <Otherwise>
-      <!-- x86 specific references -->
-    </Otherwise>
-  </Choose>
 
 </Project>
