@@ -8,6 +8,7 @@ using PKHeX.Core;
 using SysBot.Base;
 using SysBot.Pokemon.Z3;
 
+
 namespace SysBot.Pokemon.ConsoleApp
 {
 	public static class Program
