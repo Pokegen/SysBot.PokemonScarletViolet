@@ -131,7 +131,7 @@ namespace SysBot.Pokemon
 
         public static async Task<(PKM, string)> GetLegalAsync(this ITrainerInfo sav, IBattleTemplate set)
         {
-            (var result, var type) = await sav.GetLegalFromSetAsync(set);
+            (var result, var type) = await sav.GetLegalAsync(set);
             var res = type.ToString();
             return (result, res);
         }
