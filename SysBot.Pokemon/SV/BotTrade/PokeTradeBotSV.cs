@@ -329,6 +329,9 @@ namespace SysBot.Pokemon
                 Hub.Queues.StartTrade(this, detail);
 
                 await PerformTrade(sav, detail, type, priority, token).ConfigureAwait(false);
+
+                // return to original position if required
+                await RestartGameIfCantTrade(false, null, token).ConfigureAwait(false);
             }
         }
 
@@ -408,6 +411,9 @@ namespace SysBot.Pokemon
             poke.TradeInitialize(this);
             Hub.Config.Stream.EndEnterCode(this);
 
+            if (poke.Type != PokeTradeType.Random)
+                Hub.Config.Stream.StartEnterCode(this);
+
             var toSend = poke.TradeData;
             if (toSend.Species != 0)
                 await SetBoxPokemon(toSend, token, sav).ConfigureAwait(false);
@@ -418,8 +424,6 @@ namespace SysBot.Pokemon
                 return PokeTradeResult.RecoverStart;
             }
 
-            if (poke.Type != PokeTradeType.Random)
-                Hub.Config.Stream.StartEnterCode(this);
             if (!await BeginTradeViaCode(poke, poke.Code, token).ConfigureAwait(false))
             {
                 for (int i = 0; i < 5; ++i)
@@ -646,9 +650,8 @@ namespace SysBot.Pokemon
 
             await Task.Delay(0_500, token).ConfigureAwait(false);
             await Click(PLUS, 1_000, token).ConfigureAwait(false);
-            await Click(A, 0_500, token).ConfigureAwait(false);
-            await Click(A, 0_500, token).ConfigureAwait(false);
-            await Click(A, 0_500, token).ConfigureAwait(false);
+            for (int i = 0; i < 5; ++i)
+                await Click(A, 0_500, token).ConfigureAwait(false);
 
             int checks = 3;
             while (!await IsSearching(token).ConfigureAwait(false))
