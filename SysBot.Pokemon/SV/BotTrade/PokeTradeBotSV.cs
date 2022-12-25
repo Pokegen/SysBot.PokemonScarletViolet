@@ -467,7 +467,7 @@ namespace SysBot.Pokemon
 
             bool multi = false;
             bool IsSafe = poke.Trainer.ID == 0 || NewAntiAbuse.Instance.LogUser(tradePartner.IDHash, tradePartnerNID, tradePartner.TrainerName, poke.Trainer.TrainerName, Hub.Config.TradeAbuse.MultiAbuseEchoMention, out multi);
-            if (!IsSafe || (multi && AbuseSettings.AllowMultiAccountUse))
+            if ((!IsSafe && !AbuseSettings.AllowGloballyBlacklistedAccounts) || (multi && AbuseSettings.AllowMultiAccountUse))
             {
                 Log($"Found known abuser: {tradePartner.TrainerName}-{tradePartner.SID}-{tradePartner.TID} ({poke.Trainer.TrainerName}) (NID: {tradePartnerNID}) origin: {poke.Notifier.IdentifierLocator}");
                 poke.SendNotification(this, $"Your savedata is associated with a known abuser. Consider not being an abuser, and you will no longer see this message.");
@@ -476,7 +476,7 @@ namespace SysBot.Pokemon
 
             Log($"Found trading partner: {tradePartner.TrainerName}-{tradePartner.TID}-{tradePartner.SID} ({poke.Trainer.TrainerName}) (NID: {tradePartnerNID}) [CODE:{poke.Code:00000000}]");
 
-            if (BadUserList.Users.Contains(tradePartnerNID))
+            if (!AbuseSettings.AllowGloballyBlacklistedAccounts && BadUserList.Users.Contains(tradePartnerNID))
                 return PokeTradeResult.SuspiciousActivity;
 
             poke.SendNotification(this, $"Found Trading Partner: {tradePartner.TrainerName}. TID: {tradePartner.TID} SID: {tradePartner.SID} Waiting for a Pokémon...");
@@ -567,11 +567,12 @@ namespace SysBot.Pokemon
                 return PokeTradeResult.NoPokemonDetected;
             }
 
-            poke.SendNotification(this, received, $"You sent me {(Species)received.Species} for {(Species)toSend.Species}!");
-
             // As long as we got rid of our inject in b1s1, assume the trade went through.
             Log("User completed the trade.");
             poke.TradeFinished(this, received);
+
+            if (DumpSetting.Dump && !string.IsNullOrEmpty(DumpSetting.DumpFolder))
+                DumpPokemon(DumpSetting.DumpFolder, "trade", received);
 
             await AttemptGetBackToPokePortal(token).ConfigureAwait(false);
             return PokeTradeResult.Success;
@@ -597,7 +598,7 @@ namespace SysBot.Pokemon
                 var v1 = await SwitchConnection.PointerPeek(BoxFormatSlotSize, BoxStartPokemonPointer, token).ConfigureAwait(false);
                 if (!v1.SequenceEqual(oldPKData))
                 {
-                    await Task.Delay(26_000, token).ConfigureAwait(false);
+                    await Task.Delay(16_000 + Hub.Config.Timings.ExtraTimeTradeAnimation, token).ConfigureAwait(false);
                     return PokeTradeResult.Success;
                 }
                 if (tradeCounter >= Hub.Config.Trade.TradeAnimationMaxDelaySeconds)
@@ -761,6 +762,10 @@ namespace SysBot.Pokemon
                 // They get one more chance.
                 pkmChanged = await ReadUntilChanged(offset, oldEC, 15_000, 0_200, false, true, token).ConfigureAwait(false);
             }
+
+            // Dump if required
+            if (DumpSetting.Dump)
+                DumpPokemon(DumpSetting.DumpFolder, "clone", offered);
 
             // resolve pointer for any shifts
             offset = await SwitchConnection.PointerAll(LinkTradePartnerPokemonPointer, token).ConfigureAwait(false);
