@@ -74,9 +74,9 @@ namespace SysBot.Pokemon
                 Log($"Starting main {nameof(PokeTradeBotSV)} loop.");
                 await InnerLoop(sav, token).ConfigureAwait(false);
             }
-#pragma warning disable CA1031 // Do not catch general exception types
+
             catch (Exception e)
-#pragma warning restore CA1031 // Do not catch general exception types
+
             {
                 Log(e.Message);
             }
@@ -394,7 +394,7 @@ namespace SysBot.Pokemon
             catch (Exception e)
             {
                 Log(e.Message);
-                result = PokeTradeResult.Exception_NPM;
+                result = PokeTradeResult.ExceptionInternal;
             }
 
             HandleAbortedTrade(detail, type, priority, result);
@@ -475,9 +475,6 @@ namespace SysBot.Pokemon
             }
 
             Log($"Found trading partner: {tradePartner.TrainerName}-{tradePartner.TID}-{tradePartner.SID} ({poke.Trainer.TrainerName}) (NID: {tradePartnerNID}) [CODE:{poke.Code:00000000}]");
-
-            if (!AbuseSettings.AllowGloballyBlacklistedAccounts && BadUserList.Users.Contains(tradePartnerNID))
-                return PokeTradeResult.SuspiciousActivity;
 
             poke.SendNotification(this, $"Found Trading Partner: {tradePartner.TrainerName}. TID: {tradePartner.TID} SID: {tradePartner.SID} Waiting for a Pokémon...");
 

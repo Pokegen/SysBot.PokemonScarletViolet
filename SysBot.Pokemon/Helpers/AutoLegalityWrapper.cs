@@ -45,8 +45,8 @@ namespace SysBot.Pokemon
         {
             // Seed the Trainer Database with enough fake save files so that we return a generation sensitive format when needed.
             string OT = cfg.GenerateOT;
-            int TID = cfg.GenerateTID16;
-            int SID = cfg.GenerateSID16;
+            ushort TID = cfg.GenerateTID16;
+            ushort SID = cfg.GenerateSID16;
             int lang = (int)cfg.GenerateLanguage;
 
             var externalSource = cfg.GeneratePathTrainerInfo;
@@ -61,8 +61,8 @@ namespace SysBot.Pokemon
                     var fallback = new SimpleTrainerInfo(v)
                     {
                         Language = lang,
-                        TID = TID,
-                        SID = SID,
+                        TID16 = TID,
+                        SID16 = SID,
                         OT = OT,
                     };
                     var exist = TrainerSettings.GetSavedTrainerData(v, i, fallback);
@@ -127,13 +127,6 @@ namespace SysBot.Pokemon
             var result = sav.GetLegalFromSet(set, out var type);
             res = type.ToString();
             return result;
-        }
-
-        public static async Task<(PKM, string)> GetLegalAsync(this ITrainerInfo sav, IBattleTemplate set)
-        {
-            (var result, var type) = await sav.GetLegalAsync(set);
-            var res = type.ToString();
-            return (result, res);
         }
 
         public static string GetLegalizationHint(IBattleTemplate set, ITrainerInfo sav, PKM pk) => set.SetAnalysis(sav, pk);
